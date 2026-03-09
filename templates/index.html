@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+<title>Plan Your Journey</title>
+
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+
+</head>
+
+<body class="form-page">
+
+<div class="form-wrapper">
+
+<h1>Plan Your Journey</h1>
+
+<p>Enter travel details and let AI generate your trip</p>
+
+<div class="travel-form">
+
+<input id="source" placeholder="From city">
+
+<input id="destination" placeholder="Destination">
+
+<input id="travelers" type="number" placeholder="Travelers">
+
+<input id="budget" type="number" placeholder="Budget ($)">
+
+<input id="days" type="number" placeholder="Travel days">
+
+<button onclick="planTrip()">Generate Travel Plan</button>
+
+</div>
+
+</div>
+
+<script src="{{ url_for('static', filename='js/script.js') }}"></script>
+
+</body>
+
+</html>

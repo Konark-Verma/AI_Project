@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+<title>AI Travel Plan</title>
+
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+
+<link rel="stylesheet"
+href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+</head>
+
+<body>
+
+<header class="result-header">
+<h1>Your AI Travel Plan</h1>
+</header>
+
+<div class="result-layout">
+
+<div class="info-panel">
+
+<div id="results"></div>
+
+</div>
+
+<div class="map-panel">
+
+<div id="map"></div>
+
+</div>
+
+</div>
+
+<script src="{{ url_for('static', filename='js/script.js') }}"></script>
+
+<script>
+window.onload=function(){
+loadResults()
+}
+</script>
+
+</body>
+
+</html>
