@@ -20,7 +20,7 @@ def plan_trip(source, destination, budget, travelers, days, travel_type='city'):
         budget (float): budget in INR
         travelers (int): number of people
         days (int): trip duration
-        travel_type (str): 'city', 'state', or 'international'
+        travel_type (str): 'city' or 'international'
     """
 
     src_coords = get_coordinates(source)
@@ -68,16 +68,13 @@ def plan_trip(source, destination, budget, travelers, days, travel_type='city'):
         notes.append('📄 Essential documents: Valid passport (6+ months validity), travel insurance, and booking confirmations.')
         notes.append(f'🕐 Estimated flight duration for {round(distance/900)} hours approximately. Book flights in advance for better rates.')
         notes.append('🛂 Check vaccination and health requirements for your destination country.')
-    elif travel_type == 'state':
-        notes.append('🚗 State travel - ensure vehicle documents and inter-state permits if required.')
-        notes.append('⛽ Budget tip: Fuel costs may vary significantly across states. Consider toll roads.')
     else:  # city travel
         notes.append('🏙 Local travel - consider public transport for cost savings and authentic experience.')
         notes.append('🚕 Peak hours: Use carpools or public transport during rush hours for better rates.')
 
-    places = get_places(destination)
+    places = get_places(destination, source)
     recommended_places = recommend_places(places)
-    itinerary = generate_itinerary(destination, recommended_places, days)
+    itinerary = generate_itinerary(source, destination, places, days)
     
     # Fetch real-time weather and pricing data
     weather = get_weather(destination)

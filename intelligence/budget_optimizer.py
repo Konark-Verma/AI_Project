@@ -22,7 +22,7 @@ def optimize_budget(
         destination (str): destination city for flight pricing
         transport (str|None): recommended transport mode (Flight/Train/Bus/Cab)
         distance_km (float|None): route distance for non-flight estimates
-        travel_type (str): 'city', 'state', or 'international'
+        travel_type (str): 'city' or 'international'
     
     Returns:
         str: formatted budget breakdown with strict cap enforcement
@@ -104,7 +104,7 @@ def optimize_budget(
                 accommodation_cost *= scale_factor
                 other_costs *= scale_factor
             
-            breakdown = f"""Budget Breakdown (₹{budget:,.0f}) - STRICT CAP ENFORCED:
+            breakdown = f"""Budget Breakdown (₹{budget:,.0f}):
 ├─ {transport_label}: ₹{transport_cost:,.0f} ({travelers} travelers)
 ├─ Accommodation: ₹{accommodation_cost:,.0f} ({days} days)
 ├─ Food & Activities: ₹{other_costs:,.0f}
@@ -112,7 +112,7 @@ def optimize_budget(
 └─ Per person per day: ₹{per_person/days:,.0f}
 
 Budget Type: {'Luxury' if per_day > 41500 else 'Standard' if per_day > 8300 else 'Budget'}
-✓ Total: ₹{actual_total:,.0f} (Never exceeds ₹{budget:,.0f})"""
+✓ Total: ₹{actual_total:,.0f} """
             return breakdown
     except Exception as e:
         print(f"Budget optimization error: {e}")
@@ -121,7 +121,7 @@ Budget Type: {'Luxury' if per_day > 41500 else 'Standard' if per_day > 8300 else
     per_day = budget / days
     per_person = budget / travelers
     
-    breakdown = f"""Budget Breakdown (₹{budget:,.0f}) - STRICT CAP:
+    breakdown = f"""Budget Breakdown (₹{budget:,.0f}):
 ├─ Per day: ₹{per_day:,.0f}
 ├─ Per person: ₹{per_person:,.0f}
 └─ Total for {days} days, {travelers} travelers

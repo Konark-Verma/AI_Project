@@ -42,10 +42,12 @@
     const params = new URLSearchParams(window.location.search);
     const ttype = params.get('type');
     if (ttype) {
-        localStorage.setItem('travelType', ttype);
+        // 'state' travel was removed; map legacy value to city.
+        const normalized = (ttype === 'state') ? 'city' : ttype;
+        localStorage.setItem('travelType', normalized);
         const label = document.getElementById('type-label');
         if (label) {
-            label.textContent = `You chose ${ttype.replace(/\b\w/g, c=>c.toUpperCase())} Travel – enter the rest of your details`;
+            label.textContent = `You chose ${normalized.replace(/\b\w/g, c=>c.toUpperCase())} Travel – enter the rest of your details`;
         }
     }
 </script>

@@ -29,7 +29,13 @@ def plan():
     travelers = int(data["travelers"])
     budget = float(data["budget"])
     days = int(data["days"])
-    travel_type = data.get("travelType","city")
+    travel_type = data.get("travelType", "city")
+    # 'state' travel option was removed; normalize any legacy value.
+    travel_type = str(travel_type).lower()
+    if travel_type == "state":
+        travel_type = "city"
+    if travel_type not in ("city", "international"):
+        travel_type = "city"
 
     result = plan_trip(source,destination,budget,travelers,days, travel_type)
 

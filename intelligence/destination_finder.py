@@ -52,6 +52,34 @@ ATTRACTIONS_DB = {
         {"name": "Parthasarathy Temple", "description": "Ancient Dravidian temple with intricate carvings. Dedicated to Lord Krishna.", "type": "Religious"},
         {"name": "San Thome Basilica", "description": "Historic Roman Catholic church built over St. Thomas's tomb. Gothic-Romanesque architecture.", "type": "Religious"},
     ],
+    "raipur": [
+        {"name": "Mahant Ghasidas Museum", "description": "Shows the tribal history of Chhattisgarh with archaeological finds and cultural artifacts.", "type": "Museum"},
+        {"name": "Nandan Van Zoo", "description": "Urban wildlife park with animal enclosures, botanical garden and recreational rides.", "type": "Nature"},
+        {"name": "Sanjeevani Van", "description": "Bird sanctuary offering peaceful walks and scenic forest views.", "type": "Nature"},
+        {"name": "Doodhadhari Monastery", "description": "Historic Harihara temple with significant spiritual and architectural heritage.", "type": "Religious"},
+        {"name": "Purkhouti Muktangan", "description": "Cultural park depicting living traditions and folk crafts of Chhattisgarh tribes.", "type": "Cultural"},
+    ],
+    "mumbai": [
+        {"name": "Gateway of India", "description": "Iconic basalt arch built in 1924. Starting point for boats to Elephanta Caves.", "type": "Historical"},
+        {"name": "Marine Drive", "description": "Promenade along the Arabian Sea; perfect for sunset walks and skyline views.", "type": "Nature"},
+        {"name": "Chhatrapati Shivaji Terminus", "description": "UNESCO site Victorian Gothic railway station with ornate design.", "type": "Historical"},
+        {"name": "Elephanta Caves", "description": "Ancient rock-cut cave temple complex featuring sculptures of Lord Shiva.", "type": "Heritage"},
+        {"name": "Colaba Causeway", "description": "Vibrant street market with eclectic shopping, street food and nightlife.", "type": "Shopping"},
+    ],
+    "kolkata": [
+        {"name": "Victoria Memorial", "description": "White marble museum and garden honoring British-era history in Kolkata.", "type": "Historical"},
+        {"name": "Howrah Bridge", "description": "Iconic cantilever bridge across the Hooghly River. Busy and photogenic landmark.", "type": "Landmark"},
+        {"name": "Dakshineswar Kali Temple", "description": "Major Hindu pilgrimage site dedicated to Goddess Kali.", "type": "Religious"},
+        {"name": "Indian Museum", "description": "Oldest museum in India with galleries of history, art, and archaeology.", "type": "Museum"},
+        {"name": "Park Street", "description": "Lively dining street with colonial charm and entertainment venues.", "type": "Cultural"},
+    ],
+    "rio de janeiro": [
+        {"name": "Christ the Redeemer", "description": "Colossal statue atop Corcovado Hill with panoramic city views.", "type": "Landmark"},
+        {"name": "Copacabana Beach", "description": "World-famous beach with vibrant sports, cafes and leisure activities.", "type": "Beach"},
+        {"name": "Sugarloaf Mountain", "description": "Cable car attraction with sweeping views of Rio and Guanabara Bay.", "type": "Nature"},
+        {"name": "Tijuca Forest", "description": "Largest urban rainforest with waterfalls, trails and wildlife.", "type": "Nature"},
+        {"name": "Lapa Arches", "description": "Historic aqueduct and nightlife district famous for samba and bars.", "type": "Cultural"},
+    ],
     "default": [
         {"name": "Main City Center", "description": "Vibrant downtown area with shops, restaurants, and local culture.", "type": "Cultural"},
         {"name": "Local Museum", "description": "Museum showcasing regional history and artifacts.", "type": "Museum"},
@@ -61,15 +89,17 @@ ATTRACTIONS_DB = {
     ]
 }
 
-def get_places(city):
-    """Get curated attractions for a city.
+def get_places(city, secondary_city=None):
+    """Get curated attractions for a city or route.
     
     Args:
-        city (str): city name
+        city (str): destination city name
+        secondary_city (str|None): source city name for origin-aware routing
     Returns:
         list: list of attraction dictionaries with name, description, and type
     """
-    city_lower = city.lower().strip()
+    city_lower = (city or '').lower().strip()
+    secondary_lower = (secondary_city or '').lower().strip()
     
     # Try real API first (OpenTripMap)
     try:
@@ -79,13 +109,25 @@ def get_places(city):
     except:
         pass
     
-    # Try direct match in curated database
-    if city_lower in ATTRACTIONS_DB:
-        return ATTRACTIONS_DB[city_lower]
+    # Try combination of destination + origin for route-aware results
+    # Destination takes priority; only use origin if destination not found
     
-    # Try partial match
+    # Try direct match in curated database for destination
+    if city_lower and city_lower in ATTRACTIONS_DB:
+        return ATTRACTIONS_DB[city_lower]
+
+    # Try secondary (origin) if destination missing
+    if secondary_lower and secondary_lower in ATTRACTIONS_DB:
+        return ATTRACTIONS_DB[secondary_lower]
+    
+    # Try partial match for destination
     for key in ATTRACTIONS_DB:
-        if key in city_lower or city_lower in key:
+        if city_lower and (key in city_lower or city_lower in key):
+            return ATTRACTIONS_DB[key]
+
+    # Try partial match for secondary city
+    for key in ATTRACTIONS_DB:
+        if secondary_lower and (key in secondary_lower or secondary_lower in key):
             return ATTRACTIONS_DB[key]
     
     # Fallback: try to fetch from Wikipedia/OSM

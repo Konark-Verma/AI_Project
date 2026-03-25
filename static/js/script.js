@@ -4,6 +4,13 @@ function getTravelType(){
     if (!tt) {
         const params = new URLSearchParams(window.location.search);
         tt = params.get('type') || 'city';
+        // 'state' travel was removed; map legacy value to city.
+        if (tt === 'state') tt = 'city';
+        localStorage.setItem('travelType', tt);
+    }
+    // Safety net: handle legacy localStorage values or direct navigation.
+    if (tt === 'state') {
+        tt = 'city';
         localStorage.setItem('travelType', tt);
     }
     return tt;
@@ -38,7 +45,9 @@ let travelers=localStorage.getItem("travelers")
 let budget=localStorage.getItem("budget")
 let days=localStorage.getItem("days")
 
-let travelType = localStorage.getItem('travelType') || 'city';
+    let travelType = localStorage.getItem('travelType') || 'city';
+    // 'state' travel was removed; map legacy value to city.
+    if (travelType === 'state') travelType = 'city';
 let response=await fetch("/plan",{
     method:"POST",
     headers:{

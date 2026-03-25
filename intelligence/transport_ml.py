@@ -10,7 +10,7 @@ def predict_transport(distance, budget, travelers, days, travel_type='city'):
         budget (float): total budget in INR
         travelers (int): number of travelers
         days (int): trip duration
-        travel_type (str): 'city', 'state', or 'international'
+        travel_type (str): 'city' or 'international'
     """
     
     # For international travel or long distances (>1500 km), flights are almost always better
