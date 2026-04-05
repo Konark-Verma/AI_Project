@@ -1,16 +1,18 @@
-from geopy.geocoders import Nominatim
 import requests
 
-geo = Nominatim(user_agent="ai_travel_planner")
 
 def get_coordinates(city):
     """Get coordinates for a city using Nominatim (OpenStreetMap API)"""
     try:
-        location = geo.geocode(city)
+        from geopy.geocoders import Nominatim
+
+        geo = Nominatim(user_agent="ai_travel_planner")
+        location = geo.geocode(city, timeout=10)
         if location:
             return (location.latitude, location.longitude)
-    except:
-        pass
+    except Exception as e:
+        print(f"Geocoding error: {e}")
+
     return (20.5937, 78.9629)
 
 def get_weather(city):

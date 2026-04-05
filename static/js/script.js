@@ -65,7 +65,9 @@ let response=await fetch("/plan",{
 
 let data=await response.json()
 
+currentPlan = data
 renderResults(data)
+initChat()
 
 showMap(data.coords)
 
@@ -73,7 +75,110 @@ showMap(data.coords)
 
 
 
-function renderResults(data){
+let currentPlan = null;
+
+function appendChatMessage(text, sender) {
+    const body = document.getElementById('chat-body')
+    if (!body) return
+
+    const messageCard = document.createElement('div')
+    messageCard.className = `chat-message ${sender}`
+    messageCard.innerHTML = `<p>${text.replace(/\n/g, '<br>')}</p>`
+    body.appendChild(messageCard)
+    body.scrollTop = body.scrollHeight
+}
+
+function getTripFromStorage() {
+    const source = localStorage.getItem('source')
+    const destination = localStorage.getItem('destination')
+    if (!source || !destination) return null
+    const travelers = parseInt(localStorage.getItem('travelers'), 10)
+    const budget = parseFloat(localStorage.getItem('budget'))
+    const days = parseInt(localStorage.getItem('days'), 10)
+    if (Number.isNaN(travelers) || Number.isNaN(budget) || Number.isNaN(days)) return null
+    let travelType = localStorage.getItem('travelType') || 'city'
+    if (travelType === 'state') travelType = 'city'
+    return { source, destination, travelers, budget, days, travel_type: travelType }
+}
+
+async function sendChatMessage(message) {
+    const payload = { message, plan: currentPlan }
+    const trip = getTripFromStorage()
+    if (trip) payload.trip = trip
+    const response = await fetch('/chat_api', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(payload)
+    })
+    return response.json()
+}
+
+function initChat() {
+    const chatBody = document.getElementById('chat-body')
+    const chatForm = document.getElementById('chat-form')
+    const chatMessage = document.getElementById('chat-message')
+    if (!chatBody || !chatForm || !chatMessage) return
+
+    chatBody.innerHTML = ''
+    appendChatMessage('Ask me about your itinerary, transport, budget, weather, or attractions for this trip.', 'bot')
+
+    chatForm.addEventListener('submit', async (event) => {
+        event.preventDefault()
+        const message = chatMessage.value.trim()
+        if (!message) return
+
+        appendChatMessage(message, 'user')
+        chatMessage.value = ''
+        const data = await sendChatMessage(message)
+        appendChatMessage(data.reply, 'bot')
+
+        if (data.replanned && data.plan) {
+            if (data.trip) {
+                localStorage.setItem('source', data.trip.source)
+                localStorage.setItem('destination', data.trip.destination)
+                localStorage.setItem('travelers', String(data.trip.travelers))
+                localStorage.setItem('budget', String(data.trip.budget))
+                localStorage.setItem('days', String(data.trip.days))
+                localStorage.setItem('travelType', data.trip.travel_type || 'city')
+            }
+            currentPlan = data.plan
+            renderResults(data.plan, data.previous_plan)
+            showMap(data.plan.coords)
+        }
+    })
+}
+
+function budgetPlanPreview(plan) {
+    const text = plan && plan.budget_plan ? plan.budget_plan : ''
+    const line = text.split('\n')[0] || ''
+    return line.length > 180 ? line.substring(0, 177) + '…' : line
+}
+
+function buildPlanComparison(previousPlan, newPlan) {
+    if (!previousPlan || !newPlan) return ''
+    return `
+<div class="card plan-comparison">
+<h3>Previous vs updated</h3>
+<div class="comparison-grid">
+<div class="comparison-col">
+<h4>Before</h4>
+<p><strong>Transport:</strong> ${previousPlan.transport || '—'}</p>
+<p><strong>Type:</strong> ${(previousPlan.travel_type || 'city').toUpperCase()}</p>
+<p><strong>Budget strategy:</strong> ${budgetPlanPreview(previousPlan).replace(/</g, '&lt;')}</p>
+</div>
+<div class="comparison-col">
+<h4>After</h4>
+<p><strong>Transport:</strong> ${newPlan.transport || '—'}</p>
+<p><strong>Type:</strong> ${(newPlan.travel_type || 'city').toUpperCase()}</p>
+<p><strong>Budget strategy:</strong> ${budgetPlanPreview(newPlan).replace(/</g, '&lt;')}</p>
+</div>
+</div>
+</div>`
+}
+
+function renderResults(data, previousPlan){
 
 let placesHTML=""
 
@@ -128,8 +233,10 @@ if (data.transport === 'Flight' && data.flights) {
 }
 
 
+const comparisonBlock = previousPlan ? buildPlanComparison(previousPlan, data) : ''
+
 document.getElementById("results").innerHTML=
-`
+`${comparisonBlock}
 <div class="card">
 <h3>Travel Type</h3>
 ${travelTypeText}
@@ -168,6 +275,11 @@ ${notesHTML}
 
 function showMap(coords){
 
+if (window.__tripMapInstance) {
+    try { window.__tripMapInstance.remove() } catch (e) {}
+    window.__tripMapInstance = null
+}
+
 // Function to calculate intermediate waypoints along great circle route
 function getGreatCircleRoute(start, end, steps = 50) {
     const lat1 = start[0] * Math.PI / 180;
@@ -200,6 +312,7 @@ function getDistance(lat1, lon1, lat2, lon2) {
 }
 
 let map = L.map('map').setView(coords[0], 3)
+window.__tripMapInstance = map
 
 L.tileLayer(
     'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'

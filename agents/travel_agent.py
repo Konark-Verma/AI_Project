@@ -11,7 +11,7 @@ from services.flight_service import get_flight_prices, get_accommodation_estimat
 from services.train_service import get_train_info
 
 
-def plan_trip(source, destination, budget, travelers, days, travel_type='city'):
+def plan_trip(source, destination, budget, travelers, days, travel_type='city', forced_transport=None):
     """Generate a travel plan.
 
     Args:
@@ -21,6 +21,7 @@ def plan_trip(source, destination, budget, travelers, days, travel_type='city'):
         travelers (int): number of people
         days (int): trip duration
         travel_type (str): 'city' or 'international'
+        forced_transport (str|None): if set, use this mode instead of ML prediction (e.g. 'Flight').
     """
 
     src_coords = get_coordinates(source)
@@ -35,7 +36,10 @@ def plan_trip(source, destination, budget, travelers, days, travel_type='city'):
         waypoint_coords.append(get_coordinates(city))
 
     # Predict transport mode; pass travel_type for international handling
-    transport = predict_transport(distance, budget, travelers, days, travel_type)
+    if forced_transport:
+        transport = forced_transport
+    else:
+        transport = predict_transport(distance, budget, travelers, days, travel_type)
 
     # adjust budget plan if international travel involves currency conversion/fees
     budget_plan = optimize_budget(

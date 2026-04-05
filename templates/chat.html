@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>TravelBot</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+</head>
+
+<body class="form-page">
+
+    <div class="chat-wrapper">
+        <header class="chat-header">
+            <div>
+                <h1>TravelBot</h1>
+                <p>Chat with AI to plan your next trip.</p>
+            </div>
+            <a class="chat-link" href="/">Back</a>
+        </header>
+
+        <div class="chat-container">
+            <div id="chat-body" class="chat-body"></div>
+
+            <form id="chat-form" class="chat-form">
+                <input id="message" type="text" placeholder="Ask TravelBot for a plan or recommendation..." autocomplete="off">
+                <button type="submit">Send</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/chat.js') }}"></script>
+    <script>
+        window.addEventListener('load', () => {
+            appendMessage('Hello! Tell me where you want to go, how many people are traveling, your budget, and how many days you have. Example: Plan a 5-day trip from Delhi to Goa for 2 people with ₹50000.', 'bot');
+        });
+    </script>
+</body>
+
+</html>
